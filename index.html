@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prediction System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #image-preview {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Atrial Fibrillation Detection</h2>
+        
+        <!-- Combined Prediction Form -->
+        <form id="combined-form" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="age" class="form-label">Age</label>
+                <input type="number" class="form-control" id="age" name="age" required>
+            </div>
+            <div class="mb-3">
+                <label for="height" class="form-label">Height (cm)</label>
+                <input type="number" step="any" class="form-control" id="height" name="height" required>
+            </div>
+            <div class="mb-3">
+                <label for="weight" class="form-label">Weight (kg)</label>
+                <input type="number" step="any" class="form-control" id="weight" name="weight" required>
+            </div>
+            <div class="mb-3">
+                <label for="gender" class="form-label">Gender</label>
+                <select class="form-control" id="gender" name="gender">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            <hr>
+            <div class="mb-3">
+                <label for="image" class="form-label">Upload ECG image</label>
+                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            </div>
+            <img id="image-preview" style="display: none;" class="img-thumbnail">
+            <button type="submit" class="btn btn-primary w-100 mt-3">Submit for Prediction</button>
+        </form>
+        
+        <hr>
+        
+        <h4 class="text-center mt-3" id="prediction-result">
+            {% if prediction_text %}
+                {{ prediction_text }}
+            {% endif %}
+        </h4>
+    </div>
+
+    <script>
+        document.getElementById("image").addEventListener("change", function(event) {
+            const reader = new FileReader();
+            reader.onload = function(){
+                const preview = document.getElementById("image-preview");
+                preview.src = reader.result;
+                preview.style.display = "block";
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        });
+        
+        document.getElementById("combined-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch("/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+               console.log(data)
+                document.getElementById("prediction-result").innerHTML=data.prediction_text;
+            });
+        });
+    </script>
+</body>
+</html>
